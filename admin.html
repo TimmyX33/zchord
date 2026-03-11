@@ -40,7 +40,6 @@
         .btn-del:hover { background: #500; border-color: #f00; color: #fff; }
         .hidden { display: none; }
 
-        /* --- โค้ดสำหรับหน้าจอมือถือ (คืนชีพแล้ว!) --- */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #2a2415; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 15px; gap: 10px; }
@@ -56,7 +55,6 @@
             .form-footer { justify-content: center; width: 100%; }
             .btn-submit { width: 100%; }
             
-            /* ทำให้ตารางเลื่อนซ้ายขวาได้บนมือถือ */
             table { display: block; overflow-x: auto; white-space: nowrap; }
         }
     </style>
@@ -64,7 +62,7 @@
 <body>
     <aside class="sidebar">
         <div class="sidebar-logo">AdminPanel</div>
-        <a href="main.html">กลับหน้าแรก</a>
+        <a href="index.html">กลับหน้าแรก</a>
         <a id="menu-add" class="active" onclick="switchView('form')">เพิ่มเพลง</a>
         <a id="menu-list" onclick="switchView('list')">จัดการเพลง</a>
     </aside>
@@ -208,3 +206,4 @@
     </script>
 </body>
 </html>
+
