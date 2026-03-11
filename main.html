@@ -40,6 +40,7 @@
 </head>
 <body>
     <nav class="navbar">
+        <a href="admin.html" style="color: #ffffff; text-decoration: none; font-size: 14px;">เพิ่มเพลง (Admin)</a>
         <a onclick="filterCategory('')">หน้าแรก</a> 
         <a onclick="filterCategory('สตริง')">สตริง</a> 
         <a onclick="filterCategory('สากล')">สากล</a> 
@@ -49,7 +50,7 @@
     <section class="hero">
         <div class="hero-header">
             <h1>Zchord</h1>
-            <p>ระบบฐานข้อมูลคอร์ดเพลง</p>
+
         </div>
 
         <div class="search-wrapper">
@@ -68,7 +69,7 @@
         </div>
 
         <div class="toolbar">
-            <a href="admin.html" style="color: #bfa356; text-decoration: none; font-size: 14px;">เพิ่มเพลง (Admin)</a>
+            
         </div>
     </section>
 
@@ -106,7 +107,7 @@
                 displaySongs = displaySongs.filter(s => s.category && s.category.toLowerCase().includes(filterCat.toLowerCase()));
                 document.getElementById('feed-title').innerHTML = `หมวดหมู่: ${filterCat}`;
             } else {
-                document.getElementById('feed-title').innerHTML = `พลงอัปเดตล่าสุด (Real-time)`;
+                document.getElementById('feed-title').innerHTML = `เพลงอัปเดตล่าสุด`;
             }
 
             if (displaySongs.length === 0) {
