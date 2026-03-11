@@ -165,7 +165,7 @@
                     await setDoc(newDocRef, songData);
                     finalId = newDocRef.id;
                 }
-                alert('💾 บันทึกขึ้นระบบคลาวด์สำเร็จ!');
+                alert('บันทึกขึ้นระบบคลาวด์สำเร็จ!');
                 window.location.href = `play.html?id=${finalId}`;
             } catch (err) {
                 alert('เกิดข้อผิดพลาด: ' + err.message);
@@ -191,9 +191,9 @@
                         <td>${song.artist}</td>
                         <td>${song.key}</td>
                         <td>
-                            <button class="action-btn" onclick="window.location.href='play.html?id=${song.id}'">เล่น</button>
-                            <button class="action-btn" onclick="window.location.href='admin.html?edit=${song.id}'">แก้</button>
-                            <button class="action-btn btn-del" onclick="deleteSong('${song.id}')">ลบ</button>
+                            <button class="action-btn" onclick="window.location.href='play.html?id=${song.id}'">ดูเพลง</button>
+                            <button class="action-btn" onclick="window.location.href='admin.html?edit=${song.id}'">แก้เพลง</button>
+                            <button class="action-btn btn-del" onclick="deleteSong('${song.id}')">ลบเพลง</button>
                         </td>
                     </tr>
                 `;
@@ -207,4 +207,5 @@
         };
     </script>
 </body>
+
 </html>
