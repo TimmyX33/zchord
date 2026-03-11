@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการคอร์ดเพลง</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Kanit', sans-serif; background-color: #0a0a0a; color: #e0e0e0; display: flex; min-height: 100vh; }
+        
+        .sidebar { width: 250px; background-color: #050505; border-right: 1px solid #2a2415; padding: 30px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .sidebar-logo { color: #bfa356; font-size: 22px; font-weight: 500; margin-bottom: 20px; text-align: center; border-bottom: 1px solid #2a2415; padding-bottom: 15px; }
+        .sidebar a { color: #777; text-decoration: none; font-size: 15px; padding: 10px 15px; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .sidebar a.active, .sidebar a:hover { background-color: #121212; color: #bfa356; border-left: 3px solid #8c7335; }
+        
+        .main-content { flex: 1; padding: 40px; background: radial-gradient(circle at top right, #181818 0%, #050505 100%); overflow-y: auto; }
+        .content-box { width: 100%; max-width: 900px; margin: 0 auto; background-color: #121212; border-radius: 15px; padding: 40px; border: 1px solid #1f1a0e; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .box-header { margin-bottom: 30px; border-bottom: 1px solid #2a2415; padding-bottom: 15px; }
+        .box-header h2 { font-size: 24px; color: #bfa356; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-size: 14px; color: #a68a3d; }
+        .form-input { background: #0a0a0a; border: 1px solid #332a15; border-radius: 8px; padding: 12px; color: #fff; font-family: inherit; outline: none; }
+        .form-input:focus { border-color: #bfa356; }
+        .textarea-group { grid-column: span 2; }
+        .lyric-textarea { height: 300px; background: #0a0a0a; border: 1px solid #332a15; border-radius: 8px; padding: 15px; color: #e0e0e0; font-family: 'Courier New', monospace; outline: none; resize: vertical; }
+        
+        .form-footer { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
+        .btn-submit { background: #1a1a1a; color: #bfa356; border: 1px solid #5a4b24; padding: 10px 35px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { background: #bfa356; color: #000; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #2a2415; }
+        th { color: #a68a3d; font-weight: 500; }
+        tr:hover { background-color: #1a1a1a; }
+        .action-btn { background: transparent; border: 1px solid #444; color: #ccc; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-right: 5px; }
+        .action-btn:hover { background: #333; color: #fff; }
+        .btn-del:hover { background: #500; border-color: #f00; color: #fff; }
+        .hidden { display: none; }
+
+        /* --- โค้ดสำหรับหน้าจอมือถือ (คืนชีพแล้ว!) --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #2a2415; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 15px; gap: 10px; }
+            .sidebar-logo { width: 100%; margin-bottom: 5px; border-bottom: none; padding-bottom: 0; font-size: 20px; }
+            .sidebar a { font-size: 13px; padding: 8px 12px; flex: 1; text-align: center; }
+            
+            .main-content { padding: 15px; }
+            .content-box { padding: 20px; }
+            .box-header h2 { font-size: 20px; }
+            
+            .form-grid { grid-template-columns: 1fr; }
+            .textarea-group { grid-column: span 1; }
+            .form-footer { justify-content: center; width: 100%; }
+            .btn-submit { width: 100%; }
+            
+            /* ทำให้ตารางเลื่อนซ้ายขวาได้บนมือถือ */
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">AdminPanel</div>
+        <a href="main.html">กลับหน้าแรก</a>
+        <a id="menu-add" class="active" onclick="switchView('form')">เพิ่มเพลง</a>
+        <a id="menu-list" onclick="switchView('list')">จัดการเพลง</a>
+    </aside>
+
+    <main class="main-content">
+        <div id="view-form" class="content-box">
+            <div class="box-header"><h2 id="form-title">เพิ่มคอร์ดเพลงใหม่ (Online)</h2></div>
+            <form id="chordForm">
+                <input type="hidden" id="edit-id">
+                <div class="form-grid">
+                    <div class="input-group"><label>ชื่อเพลง</label><input type="text" id="input-songName" class="form-input" required></div>
+                    <div class="input-group"><label>ศิลปิน</label><input type="text" id="input-artistName" class="form-input" required></div>
+                    <div class="input-group"><label>คีย์ต้นฉบับ</label><input type="text" id="input-key" class="form-input" required></div>
+                    <div class="input-group"><label>หมวดหมู่</label><input type="text" id="input-category" class="form-input"></div>
+                    <div class="input-group textarea-group"><label>เนื้อร้องและคอร์ด (เคาะเว้นบรรทัดเพื่อแบ่งท่อน)</label><textarea id="input-lyrics" class="lyric-textarea" required></textarea></div>
+                </div>
+                <div class="form-footer">
+                    <button type="button" id="btn-save" class="btn-submit">บันทึกขึ้นคลาวด์</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="view-list" class="content-box hidden">
+            <div class="box-header"><h2>จัดการเพลงทั้งหมด (Real-time)</h2></div>
+            <table>
+                <thead><tr><th>ชื่อเพลง</th><th>ศิลปิน</th><th>คีย์</th><th>จัดการ</th></tr></thead>
+                <tbody id="song-table-body"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnEBJuuSMYo502UdBaq5HSRY4SLyurvFw",
+            authDomain: "zchord-6ce66.firebaseapp.com",
+            projectId: "zchord-6ce66",
+            storageBucket: "zchord-6ce66.firebasestorage.app",
+            messagingSenderId: "821179472335",
+            appId: "1:821179472335:web:52a81224471854ee9adaba"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.switchView = function(view) {
+            document.getElementById('view-form').classList.toggle('hidden', view !== 'form');
+            document.getElementById('view-list').classList.toggle('hidden', view !== 'list');
+            document.getElementById('menu-add').classList.toggle('active', view === 'form');
+            document.getElementById('menu-list').classList.toggle('active', view === 'list');
+            if(view === 'form' && !document.getElementById('edit-id').value) {
+                document.getElementById('chordForm').reset();
+                document.getElementById('form-title').textContent = 'เพิ่มคอร์ดเพลงใหม่ (Online)';
+            }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('edit');
+        if (editId) {
+            getDoc(doc(db, "songs", editId)).then(docSnap => {
+                if (docSnap.exists()) {
+                    const song = docSnap.data();
+                    document.getElementById('edit-id').value = docSnap.id;
+                    document.getElementById('input-songName').value = song.name;
+                    document.getElementById('input-artistName').value = song.artist;
+                    document.getElementById('input-key').value = song.key;
+                    document.getElementById('input-category').value = song.category || '';
+                    document.getElementById('input-lyrics').value = song.content;
+                    document.getElementById('form-title').textContent = 'แก้ไขเนื้อเพลง: ' + song.name;
+                }
+            });
+        }
+
+        document.getElementById('btn-save').addEventListener('click', async () => {
+            const name = document.getElementById('input-songName').value;
+            const artist = document.getElementById('input-artistName').value;
+            if(!name || !artist) return alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+
+            document.getElementById('btn-save').textContent = 'กำลังบันทึก...';
+            const currentId = document.getElementById('edit-id').value;
+            const songData = {
+                name: name,
+                artist: artist,
+                key: document.getElementById('input-key').value,
+                category: document.getElementById('input-category').value,
+                content: document.getElementById('input-lyrics').value,
+                timestamp: Date.now()
+            };
+
+            try {
+                let finalId = currentId;
+                if (currentId) {
+                    await setDoc(doc(db, "songs", currentId), songData);
+                } else {
+                    const newDocRef = doc(collection(db, "songs"));
+                    await setDoc(newDocRef, songData);
+                    finalId = newDocRef.id;
+                }
+                alert('💾 บันทึกขึ้นระบบคลาวด์สำเร็จ!');
+                window.location.href = `play.html?id=${finalId}`;
+            } catch (err) {
+                alert('เกิดข้อผิดพลาด: ' + err.message);
+                document.getElementById('btn-save').textContent = 'บันทึกขึ้นคลาวด์';
+            }
+        });
+
+        onSnapshot(collection(db, "songs"), (snapshot) => {
+            const tbody = document.getElementById('song-table-body');
+            tbody.innerHTML = '';
+            if (snapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">ยังไม่มีเพลงในระบบคลาวด์</td></tr>';
+                return;
+            }
+            const songs = [];
+            snapshot.forEach(doc => songs.push({ id: doc.id, ...doc.data() }));
+            songs.sort((a,b) => b.timestamp - a.timestamp);
+
+            songs.forEach(song => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${song.name}</td>
+                        <td>${song.artist}</td>
+                        <td>${song.key}</td>
+                        <td>
+                            <button class="action-btn" onclick="window.location.href='play.html?id=${song.id}'">เล่น</button>
+                            <button class="action-btn" onclick="window.location.href='admin.html?edit=${song.id}'">แก้</button>
+                            <button class="action-btn btn-del" onclick="deleteSong('${song.id}')">ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+
+        window.deleteSong = async function(id) {
+            if(confirm('ยืนยันการลบเพลงนี้ออกจากระบบคลาวด์?')) {
+                await deleteDoc(doc(db, "songs", id));
+            }
+        };
+    </script>
+</body>
+</html>

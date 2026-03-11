@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zchord</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Kanit', sans-serif; background-color: #0a0a0a; color: #e0e0e0; overflow-x: hidden; }
+        .navbar { background-color: #000; padding: 15px 0; border-bottom: 1px solid #2a2415; text-align: center; }
+        .navbar a { color: #a68a3d; text-decoration: none; font-size: 14px; margin: 0 15px; transition: color 0.3s; cursor: pointer; }
+        .navbar a:hover { color: #fff; }
+        .hero { position: relative; min-height: 85vh; background: radial-gradient(circle at center, #181818 0%, #050505 100%); display: flex; flex-direction: column; align-items: center; padding-top: 60px; padding-bottom: 80px; }
+        .hero-header { text-align: center; margin-bottom: 40px; }
+        .hero-header h1 { font-size: 28px; color: #bfa356; font-weight: 500; margin-bottom: 5px; }
+        .hero-header p { font-size: 14px; color: #777; }
+        .search-wrapper { width: 90%; max-width: 600px; border-radius: 16px; background: linear-gradient(135deg, rgba(138, 115, 57, 0.4), rgba(0,0,0,0), rgba(105, 85, 30, 0.4)); padding: 2px; display: flex; justify-content: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); }
+        .search-box-container { background-color: #121212; width: 100%; border-radius: 14px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center; }
+        .search-input { width: 85%; border: none; border-bottom: 1px solid #4a3c1c; padding: 10px 5px; text-align: center; font-size: 15px; font-family: inherit; color: #fff; background: transparent; margin-bottom: 25px; outline: none; }
+        .search-input:focus { border-bottom-color: #a68a3d; }
+        .search-btn { background-color: #1a1a1a; color: #bfa356; border: 1px solid #5a4b24; padding: 10px 45px; border-radius: 25px; cursor: pointer; transition: 0.3s; margin-bottom: 20px; }
+        .search-btn:hover { background-color: #2a2415; border-color: #8c7335; color: #fff; }
+        .recommended-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .tag-btn { background: #0a0a0a; color: #888; border: 1px solid #2a2415; padding: 5px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+        .tag-btn:hover { background: #1a1a1a; color: #d4af37; border-color: #d4af37; }
+        .song-feed { width: 90%; max-width: 800px; margin-top: 50px; }
+        .song-feed h3 { color: #bfa356; font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid #2a2415; padding-bottom: 10px; }
+        .song-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+        .song-card { background: #121212; border: 1px solid #1f1a0e; border-radius: 12px; padding: 15px; text-decoration: none; display: flex; flex-direction: column; transition: 0.3s; }
+        .song-card:hover { background: #1a1a1a; border-color: #8c7335; transform: translateY(-3px); }
+        .song-title { color: #e0e0e0; font-size: 16px; font-weight: 500; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .song-artist { color: #777; font-size: 13px; margin-bottom: 15px; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .song-key { background: #2a2415; color: #d1b875; font-size: 11px; padding: 3px 10px; border-radius: 10px; }
+        .song-genre { color: #8c7335; font-size: 12px; background: #1a1a1a; padding: 3px 10px; border-radius: 10px; border: 1px solid #332a15; }
+        .empty-feed { color: #666; text-align: center; padding: 30px; background: #121212; border-radius: 12px; border: 1px dashed #2a2415; grid-column: 1 / -1; }
+        .toolbar { border-top: 1px solid #2a2415; padding: 25px 20px 0; margin-top: 50px; text-align: center;}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a onclick="filterCategory('')">หน้าแรก</a> 
+        <a onclick="filterCategory('สตริง')">สตริง</a> 
+        <a onclick="filterCategory('สากล')">สากล</a> 
+        <a onclick="filterCategory('ลูกทุ่ง')">ลูกทุ่ง</a>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-header">
+            <h1>Zchord</h1>
+            <p>ระบบฐานข้อมูลคอร์ดเพลง</p>
+        </div>
+
+        <div class="search-wrapper">
+            <div class="search-box-container">
+                <h2>ค้นหาคอร์ดเพลง</h2>
+                <input type="text" id="search-input" class="search-input" placeholder="พิมพ์ชื่อเพลง, ศิลปิน...">
+                <button id="search-btn" class="search-btn">ค้นหาในระบบ</button>
+            </div>
+        </div>
+
+        <div class="song-feed" id="feed-section">
+            <h3 id="feed-title">เพลงอัปเดตล่าสุด</h3>
+            <div class="song-grid" id="recommended-songs-grid">
+                <div class="empty-feed">กำลังโหลดข้อมูลจากคลาวด์...</div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <a href="admin.html" style="color: #bfa356; text-decoration: none; font-size: 14px;">เพิ่มเพลง (Admin)</a>
+        </div>
+    </section>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnEBJuuSMYo502UdBaq5HSRY4SLyurvFw",
+            authDomain: "zchord-6ce66.firebaseapp.com",
+            projectId: "zchord-6ce66",
+            storageBucket: "zchord-6ce66.firebasestorage.app",
+            messagingSenderId: "821179472335",
+            appId: "1:821179472335:web:52a81224471854ee9adaba"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let globalSongs = [];
+
+        // --- ฟังการเปลี่ยนแปลงจากคลาวด์ตลอดเวลา ---
+        onSnapshot(collection(db, "songs"), (snapshot) => {
+            globalSongs = [];
+            snapshot.forEach(doc => globalSongs.push({ id: doc.id, ...doc.data() }));
+            // เรียงจากใหม่ไปเก่า
+            globalSongs.sort((a,b) => b.timestamp - a.timestamp);
+            renderGrid(''); // วาดใหม่ทุกครั้งที่มีคนเพิ่ม/ลบเพลง
+        });
+
+        window.renderGrid = function(filterCat) {
+            const grid = document.getElementById('recommended-songs-grid');
+            let displaySongs = globalSongs;
+
+            if (filterCat !== '') {
+                displaySongs = displaySongs.filter(s => s.category && s.category.toLowerCase().includes(filterCat.toLowerCase()));
+                document.getElementById('feed-title').innerHTML = `หมวดหมู่: ${filterCat}`;
+            } else {
+                document.getElementById('feed-title').innerHTML = `พลงอัปเดตล่าสุด (Real-time)`;
+            }
+
+            if (displaySongs.length === 0) {
+                grid.style.display = 'block';
+                grid.innerHTML = `<div class="empty-feed">ยังไม่มีเพลงในระบบ (ไปเพิ่มเพลงที่หน้า Admin กันเลย)</div>`;
+                return;
+            }
+
+            let html = '';
+            displaySongs.slice(0, 12).forEach(song => {
+                const genreText = song.category ? `🏷️ ${song.category}` : 'ทั่วไป';
+                html += `
+                    <a href="play.html?id=${song.id}" class="song-card">
+                        <div class="song-title">${song.name}</div>
+                        <div class="song-artist">${song.artist}</div>
+                        <div class="card-footer">
+                            <span class="song-key">Key: ${song.key}</span>
+                            <span class="song-genre">${genreText}</span>
+                        </div>
+                    </a>
+                `;
+            });
+            grid.style.display = 'grid'; 
+            grid.innerHTML = html;
+        }
+
+        // ระบบปุ่มต่างๆ
+        window.filterCategory = function(cat) {
+            renderGrid(cat);
+            document.getElementById('feed-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.quickSearch = function(kw) {
+            document.getElementById('search-input').value = kw;
+            executeSearch(kw.toLowerCase());
+        }
+
+        function executeSearch(query) {
+            if (!query) return;
+            const foundSong = globalSongs.find(s => s.name.toLowerCase().includes(query) || s.artist.toLowerCase().includes(query));
+            if (foundSong) window.location.href = `play.html?id=${foundSong.id}`;
+            else alert(`ไม่พบเพลง "${query}" ในคลาวด์ครับ`);
+        }
+
+        document.getElementById('search-btn').addEventListener('click', () => executeSearch(document.getElementById('search-input').value.trim().toLowerCase()));
+        document.getElementById('search-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('search-btn').click(); });
+    </script>
+</body>
+</html>
